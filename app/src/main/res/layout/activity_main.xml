@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/relative_layout"
+    tools:context=".ui.MainActivity">
+    <Button
+        android:id="@+id/settings_button_main"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/button_background"
+        android:layout_centerInParent="true"
+        android:text="Settings"
+        android:textSize="30sp" />
+
+    <Button
+        android:id="@+id/play_button_main"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_background"
+        android:layout_centerInParent="true"
+        android:text="Play"
+        android:layout_above="@id/settings_button_main"
+        android:textSize="30sp" />
+
+    <ProgressBar android:id="@+id/initial_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="invisible" />
+
+</RelativeLayout>
