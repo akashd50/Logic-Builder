@@ -35,7 +35,7 @@ public class Texture {
         loadSpecularTexture(c,sID);
     }
 
-    private int loadTexture(Context context, int resID){
+    public void loadTexture(Context context, int resID){
         textureID = new int[1];
         GLES30.glGenTextures(1, textureID, 0);
         final BitmapFactory.Options options = new BitmapFactory.Options();
@@ -50,8 +50,19 @@ public class Texture {
         bitmap.recycle();
         GLES30.glGenerateMipmap(GLES30.GL_TEXTURE_2D);
         GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, 0);
+    }
 
-        return textureID[0];
+    public void loadTexture(Bitmap bitmap){
+        textureID = new int[1];
+        GLES30.glGenTextures(1, textureID, 0);
+
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textureID[0]);
+        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D,GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR_MIPMAP_LINEAR);
+        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR);
+        GLUtils.texImage2D(GLES30.GL_TEXTURE_2D, 0, bitmap, 0);
+        bitmap.recycle();
+        GLES30.glGenerateMipmap(GLES30.GL_TEXTURE_2D);
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, 0);
     }
 
     private int loadSpecularTexture(Context context, int resID){

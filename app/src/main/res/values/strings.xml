@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">LB</string>
+    <string name="new_board">New Board</string>
+    <string name="existing_boards">Existing Boards</string>
 </resources>

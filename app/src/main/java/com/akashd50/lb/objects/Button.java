@@ -1,6 +1,7 @@
 package com.akashd50.lb.objects;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.view.MotionEvent;
 
 import com.akashd50.lb.R;
@@ -9,8 +10,10 @@ import com.akashd50.lb.utils.Shader;
 public class Button extends Controller {
     private Quad2D buttonIcon, buttonSelectedBoundary;
     private SimpleVector dimensions, location;
-    private boolean isClicked, wasClicked;
+    private boolean isClicked, wasClicked, selected;
     private long eventDownTime;
+    private int integerTag;
+    private String stringTag;
     public Button(int resId, SimpleVector dimensions, Context c){
         Texture t1 = new Texture("loadT", c, resId);
         Texture t2 = new Texture("s", c, R.drawable.selectedboundary);
@@ -28,6 +31,28 @@ public class Button extends Controller {
         this.dimensions = new SimpleVector(dimensions.x,dimensions.y,1f);
         isClicked = false;
         wasClicked = false;
+        selected = false;
+        buttonIcon.setOpacity(1.0f);
+        buttonSelectedBoundary.setOpacity(1.0f);
+
+        cID = Controller.getNextID();
+    }
+
+    public Button(SimpleVector dimensions, Context c){
+        Texture t2 = new Texture("s", c, R.drawable.selectedboundary);
+        int quadProgram = Shader.getQuadTextureProgram();
+
+        buttonSelectedBoundary = new Quad2D(dimensions.x, dimensions.y);
+        buttonSelectedBoundary.setRenderPreferences(quadProgram, Quad2D.REGULAR);
+        buttonSelectedBoundary.setTextureUnit(t2);
+
+        buttonIcon = new Quad2D(dimensions.x, dimensions.y);
+        buttonIcon.setRenderPreferences(quadProgram, Quad2D.REGULAR);
+
+        location = new SimpleVector(0f,0f,0f);
+        this.dimensions = new SimpleVector(dimensions.x,dimensions.y,1f);
+        isClicked = false;
+        wasClicked = false;
         buttonIcon.setOpacity(1.0f);
         buttonSelectedBoundary.setOpacity(1.0f);
 
@@ -37,7 +62,7 @@ public class Button extends Controller {
     @Override
     public void onDrawFrame(float[] mMVPMatrix) {
         buttonIcon.draw(mMVPMatrix);
-        if(wasClicked) buttonSelectedBoundary.draw(mMVPMatrix);
+        if(selected) buttonSelectedBoundary.draw(mMVPMatrix);
     }
 
     @Override
@@ -67,8 +92,9 @@ public class Button extends Controller {
                 isClicked = false;
                 activeMotionEvent = null;
 
-                if(!wasClicked) wasClicked = true;
-                else wasClicked = false;
+                wasClicked = true;
+
+                selected = !selected;
 
                 if(listener!=null) listener.onTouchUp(event, this);
             }
@@ -90,7 +116,9 @@ public class Button extends Controller {
     public boolean wasClicked(){
         return wasClicked;
     }
+
     public void resetWasClicked(){wasClicked = false;}
+    public void resetSelected(){selected = false;}
 
     public SimpleVector getLocation() {
         return location;
@@ -110,4 +138,19 @@ public class Button extends Controller {
         return buttonIcon.getTextureUnit().getTexture();
     }
     public Texture getTextureUnit(){return buttonIcon.getTextureUnit();}
+    public void setButtonTexture(Texture t){buttonIcon.setTextureUnit(t);}
+
+    public int getIntegerTag(){
+        return integerTag;
+    }
+    public String getStringTag(){
+        return stringTag;
+    }
+
+    public void setTag(int i){
+        this.integerTag = i;
+    }
+    public void setTag(String i){
+        this.stringTag = i;
+    }
 }

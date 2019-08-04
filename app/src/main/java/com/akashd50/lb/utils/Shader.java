@@ -1,5 +1,6 @@
 package com.akashd50.lb.utils;
 
+import android.opengl.GLES20;
 import android.opengl.GLES30;
 import android.opengl.Matrix;
 
@@ -470,10 +471,11 @@ public class Shader {
                         "{" +
                             "gl_FragColor = opacity * texture(u_TextureUnit, v_TextureCoordinates);" +
                         "}";
-        if(quadTextureProgram == -1) {
+       // if(quadTextureProgram == -1) {
             quadTextureProgram = generateShadersAndProgram(vertex, fragment);
-            return quadTextureProgram;
-        }else return quadTextureProgram;
+         //   return quadTextureProgram;
+        //}else return quadTextureProgram;
+        return quadTextureProgram;
     }
 
     public static int getHDRQuadTextureProgram(){
@@ -676,6 +678,39 @@ public class Shader {
                             "if(v_opacity >= 1.0) brightColor = fragColor;"+
                         "}";
         return generateShadersAndProgram(vertex, fragment);
+    }
+
+    public static int getLineShaderPorgram(){
+        final String vertexShaderCode =
+                        "#version 300 es\n"+
+                        "in vec4 vPosition;" +
+                        "in vec4 a_Color;"+
+                        "out vec4 v_Color;"+
+                        "uniform mat4 uMVPMatrix;"+
+                        "void main() {" +
+                        "   v_Color = a_Color;"+
+                        "   gl_Position = uMVPMatrix * vPosition;" +
+                        "}";
+
+        final String fragmentShaderCode =
+                        "#version 300 es\n"+
+                        "precision mediump float;" +
+                        "in vec4 v_Color;"+
+                        "out vec4 gl_FragColor;"+
+                        "void main() {" +
+                        "  gl_FragColor = v_Color;" +
+                        "}";
+        int vertexShader = loadShader(GLES30.GL_VERTEX_SHADER,
+                vertexShaderCode);
+        int fragmentShader = loadShader(GLES30.GL_FRAGMENT_SHADER,
+                fragmentShaderCode);
+
+        // create empty OpenGL ES Program
+        int mProgram = GLES30.glCreateProgram();
+        GLES30.glAttachShader(mProgram, vertexShader);
+        GLES30.glAttachShader(mProgram, fragmentShader);
+        GLES30.glLinkProgram(mProgram);
+        return mProgram;
     }
 
 

@@ -7,22 +7,39 @@ import android.view.View;
 
 import com.akashd50.lb.logic.TouchController;
 
+import javax.microedition.khronos.egl.EGL10;
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.egl.EGLDisplay;
+
 public class MainGameSurfaceView extends GLSurfaceView {
     private static MainGameRenderer mRenderer;
     public static TouchController touchController;
 
-    public MainGameSurfaceView(Context context){
+    public MainGameSurfaceView(Context context, int bID, String name, int x, int y){
         super(context);
 
         touchController = new TouchController();
-        this.setEGLContextClientVersion(3);
-        this.setEGLConfigChooser(8,8,8,8,24,8);
+        //this.setEGLConfigChooser(8,8,8,8,24,8);
         int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE;
+
+        this.setEGLContextClientVersion(3);
         this.setSystemUiVisibility(uiOptions);
 
+          this.setEGLConfigChooser(new GLSurfaceView.EGLConfigChooser() {
+            public EGLConfig chooseConfig(EGL10 egl, EGLDisplay display) {
+                // Ensure that we get a 16bit framebuffer. Otherwise, we'll fall
+                // back to Pixelflinger on some device (read: Samsung I7500)
+                int[] attributes = new int[] { EGL10.EGL_DEPTH_SIZE, 24, EGL10.EGL_RED_SIZE, 10,
+                        EGL10.EGL_BLUE_SIZE,10,EGL10.EGL_GREEN_SIZE,10, EGL10.EGL_NONE };
+                EGLConfig[] configs = new EGLConfig[1];
+                int[] result = new int[1];
+                egl.eglChooseConfig(display, attributes, configs, 1, result);
+                return configs[0];
+            }
+        });
 
-        mRenderer = new MainGameRenderer(context, touchController);
+        mRenderer = new MainGameRenderer(context, touchController, bID, name, x, y);
 
         // Set the Renderer for drawing on the GLSurfaceView
         setRenderer(mRenderer);
@@ -30,12 +47,12 @@ public class MainGameSurfaceView extends GLSurfaceView {
 
     @Override
     public void onPause() {
-
+        super.onPause();
     }
 
     @Override
     public void onResume() {
-
+        super.onResume();
     }
 
     @Override

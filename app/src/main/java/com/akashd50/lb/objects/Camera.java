@@ -14,7 +14,7 @@ public class Camera {
 
     private SimpleVector distanceFromOrigin;
     private boolean simulateCCUMovement;
-    private int width, height;
+    private float width, height;
     public Camera(){
         cameraRotation = new SimpleVector(0f,0f,0f);
         distanceFromOrigin = new SimpleVector(0f,0f,5f);
@@ -31,7 +31,7 @@ public class Camera {
         mMVPMatrix = mvp;
     }
 
-    public void setAdditionalParms(int w, int h){
+    public void setAdditionalParms(float w, float h){
         width = w;
         height = h;
         float ratio = (float)height/(float)width;
