@@ -531,7 +531,7 @@ public class MainGameRenderer implements GLSurfaceView.Renderer {
         back = new Button(R.drawable.back_button,new SimpleVector(0.2f,0.2f,1f), context);
 
         showItemsButton = new Button(new SimpleVector(0.2f,0.2f,1f), context);
-        showItemsButton.setLocation(new SimpleVector(0.8f,1.8f,3.5f));
+        showItemsButton.setLocation(new SimpleVector(0.8f,RATIO-0.2f,3.5f));
         showItemsButton.setButtonTexture(textureContainer.getTexture(Utilities.showoptionsT));
 
         save = new Button(new SimpleVector(0.2f,0.2f,1f), context);
