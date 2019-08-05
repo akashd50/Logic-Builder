@@ -10,6 +10,7 @@ import com.akashd50.lb.utils.Shader;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 
 public class LogicBoard extends LogicObject implements Clickable{
     public static final int TOP = 1001;
@@ -284,9 +285,12 @@ public class LogicBoard extends LogicObject implements Clickable{
                         quad2.scale(new SimpleVector(1f, 1f, 1f));
                         quad2.setRenderPreferences(program, Quad2D.REGULAR);
                         quad2.setOpacity(1.0f);
-                       // drawableObjects.add(l);
 
                         boardData.add(new BoardData(l, x, y));
+                        break;
+
+                    case LogicObject.LOGIC_BOARD:
+
                         break;
                 }
             }
@@ -325,7 +329,16 @@ public class LogicBoard extends LogicObject implements Clickable{
             if (x < dimensions.x && y < dimensions.y && x >= 0 && y >= 0) {
                 logicBoard[x][y] = null;
 
-                for (BoardData b : boardData) {
+              /*  for (BoardData b : boardData) {
+                    if (x == b.x && y == b.y) {
+                        boardData.remove(b);
+                        break;
+                    }
+                }*/
+
+                ListIterator<BoardData> listIterator = boardData.listIterator();
+                while(listIterator.hasNext()){
+                    BoardData b = listIterator.next();
                     if (x == b.x && y == b.y) {
                         boardData.remove(b);
                         break;
@@ -731,19 +744,41 @@ public class LogicBoard extends LogicObject implements Clickable{
                                 clearBox(b.x - 1, b.y);
                                 Wire nw = new Wire(Wire.WIRE_LTRB);
                                 logicBoard[b.x - 1][b.y] = nw;
-                                drawingBoard[b.x - 1][b.y].setTextureUnit(nw.getTexture());
+                                //drawingBoard[b.x - 1][b.y].setTextureUnit(nw.getTexture());
+                                Quad2D quad = nw.getQuad();
+                                quad.setDefaultLocation(new SimpleVector(boardLeft + b.y, boardTop - b.x+1, 0f));
+                                quad.setTextureUnit(nw.getTexture());
+                                quad.scale(new SimpleVector(1f, 1f, 1f));
+                                quad.setRenderPreferences(program, Quad2D.REGULAR);
+                                quad.setOpacity(1.0f);
+
                                 boardData.add(new BoardData(nw, b.x - 1, b.y));
                             } else if (wire.inputsRight()) {
                                 clearBox(b.x - 1, b.y);
                                 Wire nw = new Wire(Wire.WIRE_RBLT);
                                 logicBoard[b.x - 1][b.y] = nw;
-                                drawingBoard[b.x - 1][b.y].setTextureUnit(nw.getTexture());
+                                //drawingBoard[b.x - 1][b.y].setTextureUnit(nw.getTexture());
+                                Quad2D quad = nw.getQuad();
+                                quad.setDefaultLocation(new SimpleVector(boardLeft + b.y, boardTop - b.x+1, 0f));
+                                quad.setTextureUnit(nw.getTexture());
+                                quad.scale(new SimpleVector(1f, 1f, 1f));
+                                quad.setRenderPreferences(program, Quad2D.REGULAR);
+                                quad.setOpacity(1.0f);
+
                                 boardData.add(new BoardData(nw, b.x - 1, b.y));
                             } else if (wire.inputsTop()) {
                                 clearBox(b.x - 1, b.y);
                                 Wire nw = new Wire(Wire.WIRE_TRBL);
                                 logicBoard[b.x - 1][b.y] = nw;
-                                drawingBoard[b.x - 1][b.y].setTextureUnit(nw.getTexture());
+
+                                Quad2D quad = nw.getQuad();
+                                quad.setDefaultLocation(new SimpleVector(boardLeft + b.y, boardTop - b.x+1, 0f));
+                                quad.setTextureUnit(nw.getTexture());
+                                quad.scale(new SimpleVector(1f, 1f, 1f));
+                                quad.setRenderPreferences(program, Quad2D.REGULAR);
+                                quad.setOpacity(1.0f);
+
+                                //drawingBoard[b.x - 1][b.y].setTextureUnit(nw.getTexture());
                                 boardData.add(new BoardData(nw, b.x - 1, b.y));
                             }
                         }
@@ -768,19 +803,42 @@ public class LogicBoard extends LogicObject implements Clickable{
                                 clearBox(b.x + 1, b.y);
                                 Wire nw = new Wire(Wire.WIRE_LTRB);
                                 logicBoard[b.x + 1][b.y] = nw;
-                                drawingBoard[b.x + 1][b.y].setTextureUnit(nw.getTexture());
+
+                                Quad2D quad = nw.getQuad();
+                                quad.setDefaultLocation(new SimpleVector(boardLeft + b.y, boardTop - b.x-1, 0f));
+                                quad.setTextureUnit(nw.getTexture());
+                                quad.scale(new SimpleVector(1f, 1f, 1f));
+                                quad.setRenderPreferences(program, Quad2D.REGULAR);
+                                quad.setOpacity(1.0f);
+                                //drawingBoard[b.x + 1][b.y].setTextureUnit(nw.getTexture());
                                 boardData.add(new BoardData(nw, b.x + 1, b.y));
                             } else if (wire.inputsRight()) {
                                 clearBox(b.x + 1, b.y);
                                 Wire nw = new Wire(Wire.WIRE_RBLT);
                                 logicBoard[b.x + 1][b.y] = nw;
-                                drawingBoard[b.x + 1][b.y].setTextureUnit(nw.getTexture());
+
+                                Quad2D quad = nw.getQuad();
+                                quad.setDefaultLocation(new SimpleVector(boardLeft + b.y, boardTop - b.x-1, 0f));
+                                quad.setTextureUnit(nw.getTexture());
+                                quad.scale(new SimpleVector(1f, 1f, 1f));
+                                quad.setRenderPreferences(program, Quad2D.REGULAR);
+                                quad.setOpacity(1.0f);
+
+                               // drawingBoard[b.x + 1][b.y].setTextureUnit(nw.getTexture());
                                 boardData.add(new BoardData(nw, b.x + 1, b.y));
                             } else if (wire.inputsBottom()) {
                                 clearBox(b.x + 1, b.y);
                                 Wire nw = new Wire(Wire.WIRE_BLTR);
                                 logicBoard[b.x + 1][b.y] = nw;
-                                drawingBoard[b.x + 1][b.y].setTextureUnit(nw.getTexture());
+
+                                Quad2D quad = nw.getQuad();
+                                quad.setDefaultLocation(new SimpleVector(boardLeft + b.y, boardTop - b.x-1, 0f));
+                                quad.setTextureUnit(nw.getTexture());
+                                quad.scale(new SimpleVector(1f, 1f, 1f));
+                                quad.setRenderPreferences(program, Quad2D.REGULAR);
+                                quad.setOpacity(1.0f);
+
+                                //drawingBoard[b.x + 1][b.y].setTextureUnit(nw.getTexture());
                                 boardData.add(new BoardData(nw, b.x + 1, b.y));
                             }
                         }

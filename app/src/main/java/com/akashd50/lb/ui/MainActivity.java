@@ -31,6 +31,8 @@ import com.akashd50.lb.persistense.DBContract;
 import com.akashd50.lb.persistense.DBHelper;
 import com.akashd50.lb.persistense.SQLPersistenceBoard;
 
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
@@ -49,9 +51,6 @@ public class MainActivity extends AppCompatActivity {
 
         play = findViewById(R.id.play_button_main);
         settings = findViewById(R.id.settings_button_main);
-
-
-
         listener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {

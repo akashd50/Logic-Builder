@@ -59,7 +59,7 @@ public class MainGameRenderer implements GLSurfaceView.Renderer {
     private LogicBoard logicBoard;
     private TextDecoder textDecoder;
     private SelectionDialog CURRENT_DIALOG, optionsDialog, wiresDialog, gatesDialog, boardsDialog;
-    private Button showItemsButton, back, gate, boardFolder, wire, displayZero, displayOne, emptyDisplay, emptyBox;
+    private Button showItemsButton, back, save, gate, boardFolder, wire, displayZero, displayOne, emptyDisplay, emptyBox;
     private int selectedIndexX, selectedIndexY, QUAD_TEXTURE_PROGRAM;
     private Clickable selectedComponent, longPressedComponent;
     private SimpleVector clickTestValue;
@@ -219,6 +219,11 @@ public class MainGameRenderer implements GLSurfaceView.Renderer {
                         CURRENT_DIALOG = boardsDialog;
                         CURRENT_DIALOG.showing(true);
                     }
+                }else if(c.getID() == save.getID()) {
+                    onBackPressed();
+                    save.resetSelected();
+                    save.resetWasClicked();
+                    Toast.makeText(context,"Saved!",Toast.LENGTH_SHORT).show();
                 }else{
                     if (selectedComponent != null) {
                         if (selectedComponent == c) selectedComponent = null;
@@ -529,6 +534,9 @@ public class MainGameRenderer implements GLSurfaceView.Renderer {
         showItemsButton.setLocation(new SimpleVector(0.8f,1.8f,3.5f));
         showItemsButton.setButtonTexture(textureContainer.getTexture(Utilities.showoptionsT));
 
+        save = new Button(new SimpleVector(0.2f,0.2f,1f), context);
+        save.setButtonTexture(textureContainer.getTexture(Utilities.saveButtonT));
+
         gate = new Button(new SimpleVector(0.2f,0.2f,1f), context);
         gate.setButtonTexture(textureContainer.getTexture(Utilities.gateFolderT));
 
@@ -550,6 +558,7 @@ public class MainGameRenderer implements GLSurfaceView.Renderer {
         emptyBox = new Button(R.drawable.empty_board,new SimpleVector(0.2f,0.2f,1f), context);
 
         optionsDialog.addOption(back);
+        optionsDialog.addOption(save);
         optionsDialog.addOption(emptyBox);
         optionsDialog.addOption(gate);
         optionsDialog.addOption(wire);

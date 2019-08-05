@@ -18,6 +18,7 @@ public class Utilities {
     public static String gateFolderT = "gateFolder";
     public static String wireFolderT = "wireFolderT";
     public static String boardFolderT = "boardFolderT";
+    public static String saveButtonT = "saveButtonT";
 
     public static String orGateT = "orGateT";
     public static String andGateT = "andGateT";
@@ -98,6 +99,8 @@ public class Utilities {
         t = new Texture(Utilities.wireFolderT, context, R.drawable.wire_folder);
         textureContainer.addTexture(t);
         t = new Texture(Utilities.boardFolderT, context, R.drawable.four_bit_buffer);
+        textureContainer.addTexture(t);
+        t = new Texture(Utilities.saveButtonT, context, R.drawable.save);
         textureContainer.addTexture(t);
 
         t = new Texture(Utilities.andGateT, context, R.drawable.and_gate);
@@ -189,6 +192,7 @@ public class Utilities {
         p.setColor(Color.argb(255,255,255,255));
         p.setStyle(Paint.Style.FILL);
         p.setTextSize(60);
+        p.setTextAlign(Paint.Align.CENTER);
         canvas.drawText(text,100,100,p);
 
         Texture texture = new Texture(tag);
