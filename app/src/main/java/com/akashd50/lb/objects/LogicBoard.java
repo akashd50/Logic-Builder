@@ -263,6 +263,7 @@ public class LogicBoard extends LogicObject{
                 }
             }
         }else {
+            visualizationData.clear();
             if (x < dimensions.x && y < dimensions.y && x >= 0 && y >= 0) {
                 switch (l.getType()) {
                     case LogicObject.WIRE:

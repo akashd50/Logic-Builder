@@ -26,12 +26,24 @@ public class MainGameSurfaceView extends GLSurfaceView {
         this.setEGLContextClientVersion(3);
         this.setSystemUiVisibility(uiOptions);
 
-          this.setEGLConfigChooser(new GLSurfaceView.EGLConfigChooser() {
+         /* this.setEGLConfigChooser(new GLSurfaceView.EGLConfigChooser() {
             public EGLConfig chooseConfig(EGL10 egl, EGLDisplay display) {
                 // Ensure that we get a 16bit framebuffer. Otherwise, we'll fall
                 // back to Pixelflinger on some device (read: Samsung I7500)
                 int[] attributes = new int[] { EGL10.EGL_DEPTH_SIZE, 24, EGL10.EGL_RED_SIZE, 10,
                         EGL10.EGL_BLUE_SIZE,10,EGL10.EGL_GREEN_SIZE,10, EGL10.EGL_NONE };
+                EGLConfig[] configs = new EGLConfig[1];
+                int[] result = new int[1];
+                egl.eglChooseConfig(display, attributes, configs, 1, result);
+                return configs[0];
+            }
+        });*/
+
+        this.setEGLConfigChooser(new GLSurfaceView.EGLConfigChooser() {
+            public EGLConfig chooseConfig(EGL10 egl, EGLDisplay display) {
+                // Ensure that we get a 16bit framebuffer. Otherwise, we'll fall
+                // back to Pixelflinger on some device (read: Samsung I7500)
+                int[] attributes = new int[] { EGL10.EGL_DEPTH_SIZE, 16, EGL10.EGL_NONE };
                 EGLConfig[] configs = new EGLConfig[1];
                 int[] result = new int[1];
                 egl.eglChooseConfig(display, attributes, configs, 1, result);
