@@ -1,16 +1,17 @@
 package com.akashd50.lb.objects;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.view.MotionEvent;
 
 import com.akashd50.lb.R;
 import com.akashd50.lb.utils.Shader;
 
+import org.w3c.dom.Text;
+
 public class Button extends Controller {
-    private Quad2D buttonIcon, buttonSelectedBoundary;
+    private Quad2D buttonIcon, buttonSelectedBoundary, buttonTitle;
     private SimpleVector dimensions, location;
-    private boolean isClicked, wasClicked, selected;
+    private boolean isClicked, wasClicked, selected, isLongPressed, titleTextureSet;
     private long eventDownTime;
     private int integerTag;
     private String stringTag;
@@ -27,13 +28,22 @@ public class Button extends Controller {
         buttonIcon.setRenderPreferences(quadProgram, Quad2D.REGULAR);
         buttonIcon.setTextureUnit(t1);
 
+        buttonTitle = new Quad2D(dimensions.x, dimensions.y/3);
+        buttonTitle.setRenderPreferences(quadProgram, Quad2D.REGULAR);
+
+
         location = new SimpleVector(0f,0f,0f);
         this.dimensions = new SimpleVector(dimensions.x,dimensions.y,1f);
         isClicked = false;
         wasClicked = false;
         selected = false;
+        isLongPressed = false;
+
         buttonIcon.setOpacity(1.0f);
         buttonSelectedBoundary.setOpacity(1.0f);
+        buttonTitle.setOpacity(1.0f);
+
+        buttonTitle.setDefaultLocation(new SimpleVector(location.x, location.y - dimensions.y/2 - dimensions.y/3, location.z));
 
         cID = Controller.getNextID();
     }
@@ -49,12 +59,17 @@ public class Button extends Controller {
         buttonIcon = new Quad2D(dimensions.x, dimensions.y);
         buttonIcon.setRenderPreferences(quadProgram, Quad2D.REGULAR);
 
+        buttonTitle = new Quad2D(dimensions.x, dimensions.y/3);
+        buttonTitle.setRenderPreferences(quadProgram, Quad2D.REGULAR);
+
         location = new SimpleVector(0f,0f,0f);
         this.dimensions = new SimpleVector(dimensions.x,dimensions.y,1f);
         isClicked = false;
         wasClicked = false;
+
         buttonIcon.setOpacity(1.0f);
         buttonSelectedBoundary.setOpacity(1.0f);
+        buttonTitle.setOpacity(1.0f);
 
         cID = Controller.getNextID();
     }
@@ -63,6 +78,7 @@ public class Button extends Controller {
     public void onDrawFrame(float[] mMVPMatrix) {
         buttonIcon.draw(mMVPMatrix);
         if(selected) buttonSelectedBoundary.draw(mMVPMatrix);
+        if(titleTextureSet) buttonTitle.draw(mMVPMatrix);
     }
 
     @Override
@@ -81,6 +97,14 @@ public class Button extends Controller {
 
     @Override
     public void onTouchMove(MotionEvent event) {
+        int index = event.getActionIndex();
+        if(index!=-1){
+            if(!buttonIcon.isClicked(event.getX(index),event.getY(index))) {
+               isClicked = false;
+               isLongPressed();
+            }
+        }
+
         if(listener!=null) listener.onTouchMove(event, this);
     }
 
@@ -91,11 +115,8 @@ public class Button extends Controller {
             if (buttonIcon.isClicked(event.getX(index), event.getY(index)) && !isLongPressed()) {
                 isClicked = false;
                 activeMotionEvent = null;
-
                 wasClicked = true;
-
                 selected = !selected;
-
                 if(listener!=null) listener.onTouchUp(event, this);
             }
         }else{
@@ -103,15 +124,19 @@ public class Button extends Controller {
             activeMotionEvent = null;
             wasClicked = false;
         }
+        isLongPressed = false;
     }
 
     public void setLocation(SimpleVector location) {
         this.location = location;
         buttonIcon.setDefaultLocation(new SimpleVector(location.x, location.y, location.z));
         buttonSelectedBoundary.setDefaultLocation(new SimpleVector(location.x, location.y, location.z+0.5f));
+        buttonTitle.setDefaultLocation(new SimpleVector(location.x, location.y - dimensions.y/2 - dimensions.y/3, location.z));
     }
 
     public boolean isClicked(){return isClicked;}
+
+    public boolean isClicked(float x, float y){return buttonIcon.isClicked(x,y);}
 
     public boolean wasClicked(){
         return wasClicked;
@@ -125,9 +150,17 @@ public class Button extends Controller {
     }
 
     public boolean isLongPressed(){
-        if(activeMotionEvent!=null && System.currentTimeMillis() - eventDownTime > 1000){
-            return true;
-        }else return false;
+        if(activeMotionEvent!=null){
+            int index = activeMotionEvent.getActionIndex();
+            if(index!=-1) {
+                if (buttonIcon.isClicked(activeMotionEvent.getX(index),
+                        activeMotionEvent.getY(index)) &&
+                        System.currentTimeMillis() - eventDownTime > 1000) {
+                    isLongPressed = true;
+                }
+            }
+        }
+        return isLongPressed;
     }
 
     public void rotateZ(float z){
@@ -139,6 +172,10 @@ public class Button extends Controller {
     }
     public Texture getTextureUnit(){return buttonIcon.getTextureUnit();}
     public void setButtonTexture(Texture t){buttonIcon.setTextureUnit(t);}
+    public void setButtonTitleTexture(Texture t){
+        buttonTitle.setTextureUnit(t);
+        titleTextureSet = true;
+    }
 
     public int getIntegerTag(){
         return integerTag;

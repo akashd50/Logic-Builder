@@ -1,15 +1,20 @@
 package com.akashd50.lb.utils;
 
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 
 import com.akashd50.lb.R;
 import com.akashd50.lb.logic.TextureContainer;
 import com.akashd50.lb.objects.Texture;
+import com.akashd50.lb.persistense.DBHelper;
+import com.akashd50.lb.persistense.SQLPersistenceBoard;
+import com.akashd50.lb.persistense.SQLPersistenceBoardData;
 
 public class Utilities {
     public static float SCR_ACT_HEIGHT = -1;
@@ -19,6 +24,9 @@ public class Utilities {
     public static String wireFolderT = "wireFolderT";
     public static String boardFolderT = "boardFolderT";
     public static String saveButtonT = "saveButtonT";
+
+    public static String toolsFolderT = "toolsFolderT";
+    public static String selectionModeT = "selectionModeT";
 
     public static String orGateT = "orGateT";
     public static String andGateT = "andGateT";
@@ -63,6 +71,38 @@ public class Utilities {
     public static String displayEmptyT = "displayEmptyT";
     public static String displayOneT = "displayOneT";
     public static String displayZeroT = "displayZeroT";
+
+    private static DBHelper dbHelper;
+    private static SQLPersistenceBoard sqlPersistenceBoard;
+    private static SQLPersistenceBoardData sqlPersistenceBoardData;
+    private static Context context;
+    private static boolean firstTexture = true;
+    private static Paint textPaint;
+
+    public static synchronized DBHelper getDbHelper(Context ctx){
+        context = ctx;
+        if(dbHelper==null) {
+            dbHelper = new DBHelper(context);
+            return dbHelper;
+        }
+        else return dbHelper;
+    }
+
+    public static synchronized SQLPersistenceBoard getBoardPersistence(){
+        if(sqlPersistenceBoard==null) {
+            sqlPersistenceBoard = new SQLPersistenceBoard(dbHelper);
+            return sqlPersistenceBoard;
+        }
+        else return sqlPersistenceBoard;
+    }
+
+    public static synchronized SQLPersistenceBoardData getBoardDataPersistence(){
+        if(sqlPersistenceBoardData==null) {
+            sqlPersistenceBoardData = new SQLPersistenceBoardData(dbHelper);
+            return sqlPersistenceBoardData;
+        }
+        else return sqlPersistenceBoardData;
+    }
 
     public static float getScreenHeightPixels(){
         return Resources.getSystem().getDisplayMetrics().heightPixels;
@@ -181,20 +221,40 @@ public class Utilities {
         textureContainer.addTexture(t);
         t = new Texture(Utilities.displayZeroT, context, R.drawable.display_zero_ii);
         textureContainer.addTexture(t);
+
+        t = new Texture(Utilities.toolsFolderT, context, R.drawable.tools_folder);
+        textureContainer.addTexture(t);
+
+        t = new Texture(Utilities.selectionModeT, context, R.drawable.selection_mode_t);
+        textureContainer.addTexture(t);
     }
 
-    public static Texture generateTexture(String text, String tag){
+    public static Texture generateTexture(String text, String tag, int w, int h){
         Bitmap.Config cf = Bitmap.Config.ARGB_8888;
-        Bitmap bitmap = Bitmap.createBitmap(200,200,cf);
+        Bitmap bitmap = Bitmap.createBitmap(w,h,cf);
         Canvas canvas = new Canvas(bitmap);
 
-        Paint p = new Paint();
-        p.setColor(Color.argb(255,255,255,255));
-        p.setStyle(Paint.Style.FILL);
-        p.setTextSize(60);
-        p.setTextAlign(Paint.Align.CENTER);
-        canvas.drawText(text,100,100,p);
+        int textSize = 0;
+        if(h<w){
+            textSize = h-10;
+        }else if(h == w){
+            textSize = 60;
+        }
 
+        if(firstTexture) {
+            textPaint = new Paint();
+            textPaint.setColor(Color.argb(255, 255, 255, 255));
+            textPaint.setStyle(Paint.Style.FILL);
+            textPaint.setTextAlign(Paint.Align.CENTER);
+            AssetManager am = context.getAssets();
+            Typeface plain = Typeface.createFromAsset(am, "fonts/designer.ttf");
+            textPaint.setTypeface(plain);
+            firstTexture = false;
+        }
+
+        textPaint.setTextSize(textSize);
+
+        canvas.drawText(text, w/2, h/2, textPaint);
         Texture texture = new Texture(tag);
         texture.loadTexture(bitmap);
 

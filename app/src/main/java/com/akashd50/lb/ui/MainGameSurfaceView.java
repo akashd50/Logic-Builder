@@ -15,7 +15,7 @@ public class MainGameSurfaceView extends GLSurfaceView {
     private static MainGameRenderer mRenderer;
     public static TouchController touchController;
 
-    public MainGameSurfaceView(Context context, int bID, String name, int x, int y){
+    public MainGameSurfaceView(Context context, int bID, String name, int x){
         super(context);
 
         touchController = new TouchController();
@@ -39,7 +39,7 @@ public class MainGameSurfaceView extends GLSurfaceView {
             }
         });
 
-        mRenderer = new MainGameRenderer(context, touchController, bID, name, x, y);
+        mRenderer = new MainGameRenderer(context, touchController, bID, name, x);
 
         // Set the Renderer for drawing on the GLSurfaceView
         setRenderer(mRenderer);
@@ -47,11 +47,16 @@ public class MainGameSurfaceView extends GLSurfaceView {
 
     @Override
     public void onPause() {
+        mRenderer.onPause();
         super.onPause();
     }
 
     @Override
     public void onResume() {
+        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE;
+        this.setSystemUiVisibility(uiOptions);
+        mRenderer.onResume();
         super.onResume();
     }
 

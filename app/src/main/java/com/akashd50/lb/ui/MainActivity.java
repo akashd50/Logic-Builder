@@ -27,9 +27,11 @@ import android.widget.Toast;
 import com.akashd50.lb.R;
 import com.akashd50.lb.objects.LogicBoard;
 import com.akashd50.lb.objects.LogicObject;
+import com.akashd50.lb.objects.SimpleVector;
 import com.akashd50.lb.persistense.DBContract;
 import com.akashd50.lb.persistense.DBHelper;
 import com.akashd50.lb.persistense.SQLPersistenceBoard;
+import com.akashd50.lb.utils.Utilities;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
@@ -46,8 +48,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        DBHelper dbHelper = new DBHelper(this);
-        sqlPersistenceBoard = new SQLPersistenceBoard(dbHelper);
+        DBHelper dbHelper = Utilities.getDbHelper(this);
+        sqlPersistenceBoard = Utilities.getBoardPersistence();
+
+        int sampleID = 99999;
+        if(!sqlPersistenceBoard.contains(sampleID)) {
+            LogicBoard logicBoard = new LogicBoard(new SimpleVector(21, 21, 0), sampleID);
+            logicBoard.setName("Sample");
+            sqlPersistenceBoard.insert(logicBoard);
+        }
 
         play = findViewById(R.id.play_button_main);
         settings = findViewById(R.id.settings_button_main);
@@ -85,19 +94,22 @@ public class MainActivity extends AppCompatActivity {
 
         final EditText nameBox = v.findViewById(R.id.new_board_name);
         final EditText xBox = v.findViewById(R.id.board_len);
-        final EditText yBox = v.findViewById(R.id.board_hi);
 
         AlertDialog.Builder ab = new AlertDialog.Builder(this);
         ab.setView(v);
         ab.setPositiveButton("Create", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Intent i = new Intent(MainActivity.this, MainGameActivity.class);
-                i.putExtra("bid",-1);
-                i.putExtra("name",nameBox.getText().toString());
-                i.putExtra("bx",Integer.parseInt(xBox.getText().toString()));
-                i.putExtra("by",Integer.parseInt(yBox.getText().toString()));
-                startActivity(i);
+
+                if(!xBox.getText().toString().equals("")) {
+                    Intent i = new Intent(MainActivity.this, MainGameActivity.class);
+                    i.putExtra("bid", -1);
+                    i.putExtra("name", nameBox.getText().toString());
+                    i.putExtra("bx", Integer.parseInt(xBox.getText().toString()));
+                    startActivity(i);
+                }else{
+
+                }
             }
         }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override

@@ -5,33 +5,34 @@ import android.view.MotionEvent;
 import com.akashd50.lb.R;
 import java.util.ArrayList;
 
-public class SelectionDialog implements Clickable{
+public class SelectionDialog extends Dialog{
     private ArrayList<Button> options;
-    private Button background;
-    private TouchListener touchListener;
-    private SimpleVector dialogLocation, dimensions;
     private float viewLeft, viewRight;
-    private SimpleVector nextOptionLocation;
-    private boolean isShowing, isScrollable;
+    private SimpleVector nextOptionLocation, initialOptionLocation;
     private SelectionDialog parent;
 
     public SelectionDialog(SimpleVector dimensions, SimpleVector location, Context c){
         options = new ArrayList<>();
         this.dimensions = dimensions;
         dialogLocation = location;
-        nextOptionLocation = new SimpleVector(dialogLocation.x - dimensions.x/2 + 0.2f,
-                dialogLocation.y + dimensions.y/2 - 0.2f ,3.5f);
+        initialOptionLocation = new SimpleVector(dialogLocation.x - dimensions.x/2 + 0.2f,
+                dialogLocation.y + dimensions.y/2 - 0.17f ,3.5f);
+        nextOptionLocation = new SimpleVector(initialOptionLocation);
 
         background = new Button(R.drawable.empty_board,dimensions,c);
       //  overlay = new Button(R.drawable.dialog_overlay,new SimpleVector(dimensions.x, dimensions.y+0.2f, dimensions.z),c);
      //   overlay.setLocation(dialogLocation);
         background.setLocation(dialogLocation);
-        isScrollable = false;
-
         viewLeft = nextOptionLocation.x;
     }
 
     public void addOption(Button b){
+        if(nextOptionLocation.y <= dialogLocation.y - dimensions.y/2){
+            nextOptionLocation.y = initialOptionLocation.y;
+            nextOptionLocation.x += 0.3f;
+
+            viewRight = nextOptionLocation.x;
+        }
         b.setLocation(new SimpleVector(nextOptionLocation.x, nextOptionLocation.y, nextOptionLocation.z));
         /*nextOptionLocation.x+=0.3f;
         if(nextOptionLocation.x > 0.6f){
@@ -41,12 +42,6 @@ public class SelectionDialog implements Clickable{
             viewBottom = nextOptionLocation.y;
         }*/
         nextOptionLocation.y-=0.3f;
-        if(nextOptionLocation.y <= dialogLocation.y - dimensions.y/2){
-            nextOptionLocation.y = dialogLocation.y + dimensions.y/2 - 0.2f;
-            nextOptionLocation.x += 0.3f;
-
-            viewRight = nextOptionLocation.x;
-        }
         options.add(b);
     }
 
@@ -150,6 +145,23 @@ public class SelectionDialog implements Clickable{
         }
     }
 
+    public void resetScrollLocation(){
+        nextOptionLocation = new SimpleVector(initialOptionLocation);
+        viewLeft = nextOptionLocation.x;
+        for(Button b: options){
+            b.setLocation(new SimpleVector(nextOptionLocation.x, nextOptionLocation.y, nextOptionLocation.z));
+
+            nextOptionLocation.y-=0.3f;
+            if(nextOptionLocation.y <= dialogLocation.y - dimensions.y/2){
+                nextOptionLocation.y = initialOptionLocation.y;
+                nextOptionLocation.x += 0.3f;
+
+                viewRight = nextOptionLocation.x;
+            }
+        }
+
+    }
+
     public void setTouchListener(TouchListener t){
         this.touchListener = t;
         for(Button b: options){
@@ -170,29 +182,10 @@ public class SelectionDialog implements Clickable{
         }
     }
 
-    public void showing(boolean b){
-        isShowing = b;
-    }
-
-    public boolean isShowing() {
-        return isShowing;
-    }
 
     public int getID(){
         return 9999;
     }
 
-    public boolean wasClicked(){
-        boolean wasClicked = background.wasClicked();
-        background.resetWasClicked();
-        return wasClicked;
-    }
 
-    public boolean isClicked(){return background.isClicked();}
-
-    public void setParent(SelectionDialog s){
-        this.parent = s;
-    }
-    public SelectionDialog getParent(){return parent;}
-    public Button getBackground(){return this.background;}
 }

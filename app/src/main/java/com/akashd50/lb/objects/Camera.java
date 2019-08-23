@@ -11,6 +11,7 @@ public class Camera {
     private float[] mMVPMatrix;
     private float left, right, top, bottom;
     private SimpleVector cameraRotation, followSpeed, followDelay;
+    private float cameraZoomValue;
 
     private SimpleVector distanceFromOrigin;
     private boolean simulateCCUMovement;
@@ -21,6 +22,7 @@ public class Camera {
         followSpeed = new SimpleVector(0f,0f,0f);
         followDelay = new SimpleVector(0f,0f,0f);
         simulateCCUMovement = false;
+        cameraZoomValue = 1f;
 
     }
 
@@ -97,10 +99,19 @@ public class Camera {
         float pinchZoom = 0.1f;
         if(touchController.PINCH < -1.0) {
             left-=pinchZoom;
-            right+=pinchZoom; top+=pinchZoom* ratio;bottom-=pinchZoom* ratio;
+            right+=pinchZoom;
+            top+=pinchZoom* ratio;
+            bottom-=pinchZoom* ratio;
         }else if(touchController.PINCH > 1.0){
             left+=pinchZoom;
-            right-=pinchZoom; top-=pinchZoom* ratio;bottom+=pinchZoom* ratio;
+            right-=pinchZoom;
+            top-=pinchZoom* ratio;
+            bottom+=pinchZoom* ratio;
+        }
+
+        cameraZoomValue = right * 0.5f;
+        if(cameraZoomValue < 1.0){
+            cameraZoomValue = 1.0f;
         }
 
         if(left!=right && top!=bottom) {
@@ -114,11 +125,11 @@ public class Camera {
             float cx = (touchController.getTouchX() - touchController.getTouchPrevX());
             float cy = (touchController.getTouchY() - touchController.getTouchPrevY());
 
-            if (cx > 5) distanceFromOrigin.x = distanceFromOrigin.x - 0.03f;//(cx*0.001f);
-            else if(cx<-5) distanceFromOrigin.x = distanceFromOrigin.x + 0.03f;//cx*0.001f;
+            if (cx > 5) distanceFromOrigin.x = distanceFromOrigin.x - (cameraZoomValue * 0.03f);//(cx*0.001f);
+            else if(cx<-5) distanceFromOrigin.x = distanceFromOrigin.x + (cameraZoomValue * 0.03f);//cx*0.001f;
 
-            if (cy > 10) distanceFromOrigin.y = distanceFromOrigin.y + 0.03f;//cy*0.001f;
-            else if(cy <-10)distanceFromOrigin.y = distanceFromOrigin.y - 0.03f;//cy*0.001f;
+            if (cy > 10) distanceFromOrigin.y = distanceFromOrigin.y + (cameraZoomValue * 0.03f);//cy*0.001f;
+            else if(cy <-10)distanceFromOrigin.y = distanceFromOrigin.y - (cameraZoomValue * 0.03f);//cy*0.001f;
 
             this.lookAt(new SimpleVector(distanceFromOrigin.x, distanceFromOrigin.y, 0f));
         }

@@ -35,4 +35,7 @@ public abstract class LogicObject {
 
     public static void setTextureContainer(TextureContainer tc){textureContainer = tc;}
     public Quad2D getQuad(){return quad;}
+    public String toString(){
+        return this.getType()+"";
+    }
 }

@@ -44,6 +44,19 @@ public class SQLPersistenceBoard {
         }else return false;
     }
 
+    public boolean contains(int id){
+        String[] projection = {BaseColumns._ID,
+                DBContract.DBEntry.C_BOARD_ID,
+                DBContract.DBEntry.BOARD_NAME};
+        String selection = DBContract.DBEntry.C_BOARD_ID+" = ?";
+        String[] selectionArgs = {id+""};
+        Cursor cursor = readableDB.query(DBContract.DBEntry.BOARD_TABLE_NAME, projection, selection, selectionArgs, null, null, null);
+        if(cursor.moveToNext()){
+            cursor.close();
+            return true;
+        }else return false;
+    }
+
     public LogicBoard getBoard(int id){
         String[] projection = {BaseColumns._ID,
                 DBContract.DBEntry.C_BOARD_ID,

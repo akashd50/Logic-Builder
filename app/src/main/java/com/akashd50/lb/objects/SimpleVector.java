@@ -13,6 +13,12 @@ public class SimpleVector {
         this.z = z;
     }
 
+    public SimpleVector(SimpleVector simpleVector){
+        this.x = simpleVector.x;
+        this.y = simpleVector.y;
+        this.z = simpleVector.z;
+    }
+
     public static SimpleVector minX(SimpleVector s1, SimpleVector s2, SimpleVector s3){
         if(s1.x<s2.x){
             if(s1.x<s3.x){

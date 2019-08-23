@@ -71,6 +71,8 @@ public class Gate extends LogicObject {
         }else if(style == XOR_GATE){
             if((input1 == 1 && input2 == 1) || (input1 == 0 && input2 == 0)){
                 output = 0;
+            }else if(input1 == -1 || input2 == -1){
+                output = -1;
             }else{
                 output = 1;
             }

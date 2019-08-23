@@ -33,10 +33,9 @@ public class MainGameActivity extends Activity {
         int bid = getIntent().getIntExtra("bid",-1);
         String name = getIntent().getStringExtra("name");
         int x = getIntent().getIntExtra("bx",21);
-        int y = getIntent().getIntExtra("by",21);
 
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        glRendererView = new MainGameSurfaceView(getApplication(), bid, name, x, y);
+        glRendererView = new MainGameSurfaceView(getApplication(), bid, name, x);
         setContentView(glRendererView);
     }
 

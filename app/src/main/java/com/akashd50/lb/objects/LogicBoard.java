@@ -9,40 +9,59 @@ import com.akashd50.lb.ui.MainActivity;
 import com.akashd50.lb.utils.Shader;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.ListIterator;
 
-public class LogicBoard extends LogicObject implements Clickable{
+public class LogicBoard extends LogicObject{
     public static final int TOP = 1001;
     public static final int BOTTOM = 1002;
     public static final int LEFT = 1003;
     public static final int RIGHT = 1004;
 
     private int id;
-    private SimpleVector dimensions;
+    private SimpleVector dimensions, initialLineC1, initialLineC2, clickTestValue;
     private LogicObject[][] logicBoard;
     private Quad2D[][] drawingBoard;
-    private ArrayList<BoardData> boardData;
+    private ArrayList<BoardData> boardData, visualizationData;
+    private ArrayList<BoardData> addedBoards;
     private TouchListener listener;
     private Texture emptyBox;
     private float boardLeft, boardTop;
     private int program;
+    public double touchDownTime;
     private String name;
 
     private ArrayList<Line> boardLines;
-    //private ArrayList<LogicObject> drawableObjects;
-    private boolean isNewType;
-    private SimpleVector initialLineC1, initialLineC2;
+    private boolean isNewType, isSelecting;
 
     private IO_Device[] inputs, outputs;
     private Line[] ioboxesMarking;
 
+    private Quad2D selectionRegion;
+    private Comparator<BoardData> ycomparator;
     public LogicBoard(SimpleVector dimens, int id){
         dimensions = dimens;
         logicBoard = new LogicObject[(int)dimensions.x][(int)dimensions.y];
         drawingBoard = new Quad2D[(int)dimensions.x][(int)dimensions.y];
         boardLines = new ArrayList<>();
         boardData = new ArrayList<>();
+        addedBoards = new ArrayList<>();
+        visualizationData = new ArrayList<BoardData>();
+        clickTestValue = new SimpleVector();
+
+        ycomparator = new Comparator<BoardData>() {
+            @Override
+            public int compare(BoardData o1, BoardData o2) {
+                if(o1.y < o2.y){
+                    return -1;
+                }else if(o1.y == o2.y) {
+                    return 0;
+                } else{
+                    return 1;
+                }
+            }
+        };
 
         this.id = id;
         name = "Board "+id;
@@ -52,12 +71,20 @@ public class LogicBoard extends LogicObject implements Clickable{
         inputs = new IO_Device[3];
         outputs = new IO_Device[3];
         ioboxesMarking = new Line[16];
+
+        isSelecting = false;
     }
 
     public void loadBoard(Context c){
         emptyBox = new Texture("empty", c,R.drawable.empty_board);
 
         program = Shader.getQuadTextureProgram();
+
+        selectionRegion = new Quad2D(1.0f,1.0f);
+        selectionRegion.setTextureUnit(emptyBox);
+        selectionRegion.setRenderPreferences(program,Quad2D.REGULAR);
+        selectionRegion.setOpacity(0.3f);
+        selectionRegion.scale(new SimpleVector(0f,0f,1f));
 
         float left, top;
         float bx = 1.0f;
@@ -94,13 +121,13 @@ public class LogicBoard extends LogicObject implements Clickable{
             top += 0.5f;
             left -= 0.5f;
 
-            initialLineC1 = new SimpleVector(1f, 0f, 1f);
+            initialLineC1 = new SimpleVector(0.3f, 0.3f, 0.3f);
             initialLineC2 = new SimpleVector(1f, 0f, 1f);
 
             for (int i = 0; i < (int) dimensions.x + 1; i++) {
                 Line line = new Line(new SimpleVector(left, top, 1f),
                         new SimpleVector(-left + 1.0f, top, 1f),
-                        new SimpleVector(1f, 0f, 1f));
+                        initialLineC1);
 
                 boardLines.add(line);
                 top -= by;
@@ -114,7 +141,7 @@ public class LogicBoard extends LogicObject implements Clickable{
             for (int i = 0; i < (int) dimensions.y + 1; i++) {
                 Line line = new Line(new SimpleVector(left, top, 1f),
                         new SimpleVector(left, -top + 1.0f, 1f),
-                        new SimpleVector(1f, 0f, 1f));
+                        initialLineC1);
 
                 left += bx;
                 boardLines.add(line);
@@ -212,7 +239,7 @@ public class LogicBoard extends LogicObject implements Clickable{
         }
     }
 
-    public void updateBoard(int x, int y, LogicObject l){
+    public synchronized void updateBoard(int x, int y, LogicObject l){
         if(!isNewType) {
             if(x<dimensions.x && y<dimensions.y && x>=0 && y>=0) {
                 switch (l.getType()){
@@ -241,7 +268,7 @@ public class LogicBoard extends LogicObject implements Clickable{
                     case LogicObject.WIRE:
                         Quad2D quad = l.getQuad();
                         quad.setDefaultLocation(new SimpleVector(boardLeft + y, boardTop - x, 0f));
-                        quad.setTextureUnit(l.getTexture());
+                    //    quad.setTextureUnit(l.getTexture());
                         quad.scale(new SimpleVector(1f, 1f, 1f));
                         quad.setRenderPreferences(program, Quad2D.REGULAR);
                         quad.setOpacity(1.0f);
@@ -265,7 +292,7 @@ public class LogicBoard extends LogicObject implements Clickable{
                         logicBoard[x][y] = l;
                         Quad2D quad1 = l.getQuad();
                         quad1.setDefaultLocation(new SimpleVector(boardLeft + y, boardTop - x, 0f));
-                        quad1.setTextureUnit(l.getTexture());
+                     //   quad1.setTextureUnit(l.getTexture());
                         quad1.scale(new SimpleVector(1f, 1f, 1f));
                         quad1.setRenderPreferences(program, Quad2D.REGULAR);
                         quad1.setOpacity(1.0f);
@@ -281,7 +308,7 @@ public class LogicBoard extends LogicObject implements Clickable{
                         logicBoard[x][y] = l;
                         Quad2D quad2 = l.getQuad();
                         quad2.setDefaultLocation(new SimpleVector(boardLeft + y, boardTop - x, 0f));
-                        quad2.setTextureUnit(l.getTexture());
+                       // quad2.setTextureUnit(l.getTexture());
                         quad2.scale(new SimpleVector(1f, 1f, 1f));
                         quad2.setRenderPreferences(program, Quad2D.REGULAR);
                         quad2.setOpacity(1.0f);
@@ -290,12 +317,77 @@ public class LogicBoard extends LogicObject implements Clickable{
                         break;
 
                     case LogicObject.LOGIC_BOARD:
-
+                        LogicBoard board = (LogicBoard)l;
+                        ArrayList<BoardData> objects = new ArrayList<>(board.getBoardData());
+                        for(BoardData data: objects){
+                            int bx = x - ((int)board.getDimensions().x/2 -1) + data.x;
+                            int by = y - ((int)board.getDimensions().y/2 -1) + data.y;
+                            updateBoard(bx,by,data.logicObject);
+                        }
                         break;
                 }
             }
         }
 
+        boardData.sort(ycomparator);
+
+       /* for(BoardData b: boardData){
+            System.out.println(b);
+        }*/
+    }
+
+    public synchronized void visualizeBoard(int x, int y, LogicObject l, boolean sameObject){
+        if(!sameObject) visualizationData.clear();
+
+        if (x < dimensions.x && y < dimensions.y && x >= 0 && y >= 0) {
+            switch (l.getType()) {
+                case LogicObject.WIRE:
+
+                    Quad2D quad = l.getQuad();
+                    quad.setDefaultLocation(new SimpleVector(boardLeft + y, boardTop - x, 0f));
+                    quad.scale(new SimpleVector(1f, 1f, 1f));
+                    quad.setRenderPreferences(program, Quad2D.REGULAR);
+                    quad.setOpacity(1.0f);
+
+                    BoardData b = new BoardData(l, x, y);
+                    visualizationData.add(b);
+                    optimizeWires(b);
+                    break;
+                case LogicObject.GATE:
+
+                    Quad2D quad1 = l.getQuad();
+                    quad1.setDefaultLocation(new SimpleVector(boardLeft + y, boardTop - x, 0f));
+                    quad1.scale(new SimpleVector(1f, 1f, 1f));
+                    quad1.setRenderPreferences(program, Quad2D.REGULAR);
+                    quad1.setOpacity(1.0f);
+
+                    visualizationData.add(new BoardData(l, x, y));
+                    break;
+                case LogicObject.IO_DEVICE:
+
+                    Quad2D quad2 = l.getQuad();
+                    quad2.setDefaultLocation(new SimpleVector(boardLeft + y, boardTop - x, 0f));
+                    quad2.scale(new SimpleVector(1f, 1f, 1f));
+                    quad2.setRenderPreferences(program, Quad2D.REGULAR);
+                    quad2.setOpacity(1.0f);
+
+                    visualizationData.add(new BoardData(l, x, y));
+                    break;
+
+                case LogicObject.LOGIC_BOARD:
+                    //visualizationData.clear();
+                    LogicBoard board = (LogicBoard)l;
+                    ArrayList<BoardData> objects = new ArrayList<>(board.getBoardData());
+                    for(BoardData data: objects){
+                        int bx = x - ((int)board.getDimensions().x/2 -1) + data.x;
+                        int by = y - ((int)board.getDimensions().y/2 -1) + data.y;
+                        visualizeBoard(bx,by,data.logicObject, true);
+                    }
+                    break;
+            }
+        }else{
+            if(l instanceof LogicBoard) visualizationData.clear();
+        }
     }
 
     public void updateBoardTexture(int x, int y, LogicObject l) {
@@ -313,7 +405,7 @@ public class LogicBoard extends LogicObject implements Clickable{
         }else return null;
     }
 
-    public void clearBox(int x, int y){
+    public synchronized void clearBox(int x, int y){
         if(!isNewType) {
             if (x < dimensions.x && y < dimensions.y && x >= 0 && y >= 0) {
                 logicBoard[x][y] = null;
@@ -328,14 +420,6 @@ public class LogicBoard extends LogicObject implements Clickable{
         }else{
             if (x < dimensions.x && y < dimensions.y && x >= 0 && y >= 0) {
                 logicBoard[x][y] = null;
-
-              /*  for (BoardData b : boardData) {
-                    if (x == b.x && y == b.y) {
-                        boardData.remove(b);
-                        break;
-                    }
-                }*/
-
                 ListIterator<BoardData> listIterator = boardData.listIterator();
                 while(listIterator.hasNext()){
                     BoardData b = listIterator.next();
@@ -344,18 +428,11 @@ public class LogicBoard extends LogicObject implements Clickable{
                         break;
                     }
                 }
-
-              /*  for(int i=0;i<drawableObjects.size();i++){
-                    if(drawableObjects.get(i) == toDelete){
-                        drawableObjects.remove(i);
-                        break;
-                    }
-                }*/
             }
         }
     }
 
-    public void onDrawFrame(float[] mMVPMatrix){
+    public synchronized void onDrawFrame(float[] mMVPMatrix){
         if(!isNewType) {
             for (int i = 0; i < dimensions.x; i++) {
                 for (int j = 0; j < dimensions.y; j++) {
@@ -367,9 +444,17 @@ public class LogicBoard extends LogicObject implements Clickable{
                 b.logicObject.onDrawFrame(mMVPMatrix);
             }
 
+            for (BoardData b : visualizationData) {
+                b.logicObject.onDrawFrame(mMVPMatrix);
+            }
+
+            if(isSelecting){
+                selectionRegion.draw(mMVPMatrix);
+            }
+
             Line.setLineWidth(5f);
             for (Line l: boardLines) {
-                if(initialLineC1.x < 1.0){
+               /* if(initialLineC1.x < 1.0){
                     initialLineC1.x += 0.0001f;
                 }else{
                     initialLineC1.x = 0.0f;
@@ -382,7 +467,7 @@ public class LogicBoard extends LogicObject implements Clickable{
                 }
 
                 l.updateC1(initialLineC1);
-                l.updateC2(initialLineC2);
+                l.updateC2(initialLineC2);*/
 
                 l.draw(mMVPMatrix);
             }
@@ -904,15 +989,34 @@ public class LogicBoard extends LogicObject implements Clickable{
         return null;
     }
 
-    public void onTouchDown(MotionEvent event){
-        listener.onTouchDown(event, this);
+    public void onTouchDown(final MotionEvent event){
+        /*checkLongPressed = true;
+        touchDownTime = System.currentTimeMillis();
+        clickTestValue.x = event.getRawX();
+        clickTestValue.y = event.getRawY();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(checkLongPressed){
+                    if(System.currentTimeMillis() - touchDownTime > 1000){
+                        if(Math.abs(event.getRawX() - clickTestValue.x) > 10 || Math.abs(event.getRawY() - clickTestValue.y) > 10){
+
+                        }
+                    }
+                }
+            }
+        }).start();*/
+        listener.onTouchDown(event, null);
     }
     public void onTouchUp(MotionEvent event){
-        listener.onTouchUp(event, this);
+        listener.onTouchUp(event, null);
     }
     public void onTouchMove(MotionEvent event){
-        listener.onTouchMove(event, this);
+        listener.onTouchMove(event, null);
     }
+
+
     public void setTouchListener(TouchListener l){this.listener = l;}
     public SimpleVector getDimensions(){return dimensions;}
     public int getID(){return this.id;}
@@ -934,7 +1038,6 @@ public class LogicBoard extends LogicObject implements Clickable{
     public int getOutput1(){
         return 0;
     }
-
     public void addDataToBoard(ArrayList<BoardData> list){
         for(BoardData b: list){
             updateBoard(b.x, b.y, b.logicObject);
